@@ -1,24 +1,14 @@
 <template>
   <v-app id="inspire">
-    <!-- <v-navigation-drawer
-      v-model="drawer"
-      app
-    >
-      <!--  -->
-    </v-navigation-drawer> -->
-
     <v-navigation-drawer 
       v-model="drawer"
       app
-      permanent>
+    >
       <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="text-h6">
-            Application
+            Mobjects
           </v-list-item-title>
-          <v-list-item-subtitle>
-            subtext
-          </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
 
@@ -48,29 +38,77 @@
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title>Manim Interactive</v-toolbar-title>
+
+      <v-row class="d-flex flex-row-reverse">
+        <v-btn
+          class="mx-2"
+          fab
+          dark
+          small 
+          color="purple"
+          to="/about"
+        >
+          <v-icon dark>
+            mdi-help-box
+          </v-icon>
+        </v-btn>
+
+        <v-btn
+          class="mx-2"
+          fab
+          dark
+          small 
+          color="purple"
+          to="/"
+        >
+          <v-icon dark>
+            mdi-pencil
+          </v-icon>
+        </v-btn>
+
+        <v-btn
+          class="mx-2"
+          fab
+          dark
+          small 
+          color="purple"
+        >
+          <v-icon dark>
+            mdi-download
+          </v-icon>
+        </v-btn>
+
+      </v-row>
     </v-app-bar>
 
     <v-main>
-      <!--  -->
-      <iframe
-          id="p5-canvas"
-          src="https://openprocessing.org/sketch/1227678/embed/?plusEmbedHash=MWQ5YzJiNzIwNThhYTkwY2NjZWQxMWQyM2Q1NWRhOWU4YWY0NjRkZThhMGQyYTk4MzIwOTlkYTRmZDZhZWNhNjhhMzlhY2RkOTA4N2IxZjRiYmY4ZWE3MTNkZDI3NDI3MTM2YzU0YWRiYTNiNDY5ZjY3ODgyOGY4NzU5ZGYxOGQ1bDJSRklITjJVOGFmMFpyZllrMmM0YXpXbXpKNGJEakFrOTZUTUhaOXZYVjlmNnhkY2pTUFVNVy96NXFLUXh0L3ljaFFWandCUlVTN21kVEhNN0dmZz09&plusEmbedTitle=true"
-      ></iframe>
+      <router-view></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
   export default {
-    data: () => ({ drawer: null }),
+    data: () => ({ 
+      drawer: null,
+      items: [
+          { title: 'Square', icon: 'mdi-help-box' },
+          { title: 'Circle', icon: 'mdi-help-box' },
+          { title: 'Triangle', icon: 'mdi-help-box' },
+          { title: 'Function', icon: 'mdi-help-box' },
+          { title: 'LaTeX', icon: 'mdi-help-box' },
+      ]
+    
+    }),
   }
 </script>
 
 <style lang="scss" scoped>
 #p5-canvas {
-  width: 150vw;
-  height: 180vh;
+  width: 105vw;
+  height: 105vh;
   margin-left: -50px;
   margin-top: -100px;
+  overflow: hidden;
 }
 </style>
