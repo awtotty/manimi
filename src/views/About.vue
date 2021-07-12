@@ -1,17 +1,22 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
+    <v-sheet
+      cols="12"
+    >
     <iframe
       id="about-imbed"
       src="https://www.manim.community/"
     >
     </iframe>
+
+    </v-sheet>
   </div>
 </template>
 
 <style lang="scss" scoped>
 #about-imbed {
-  width: 80vw;
-  height: 80vh;
+  width: 100vw;
+  height: 85vh;
+  overflow: auto;
 }
 </style>

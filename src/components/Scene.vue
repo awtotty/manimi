@@ -5,6 +5,7 @@
   ></iframe>
 </template>
 
+
 <script>
 export default ({
     name: "Scene",
@@ -14,3 +15,14 @@ export default ({
     })
 })
 </script>
+
+
+<style lang="scss" scoped>
+#p5-canvas {
+  width: 105vw;
+  height: 105vh;
+  margin-left: -50px;
+  margin-top: -100px;
+  overflow: hidden;
+}
+</style>
