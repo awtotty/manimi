@@ -1,20 +1,27 @@
 <template>
-  <!-- <hello-world /> -->
-
-  <iframe
-      id="p5-canvas"
-      src="https://openprocessing.org/sketch/1227678/embed/?plusEmbedHash=MWQ5YzJiNzIwNThhYTkwY2NjZWQxMWQyM2Q1NWRhOWU4YWY0NjRkZThhMGQyYTk4MzIwOTlkYTRmZDZhZWNhNjhhMzlhY2RkOTA4N2IxZjRiYmY4ZWE3MTNkZDI3NDI3MTM2YzU0YWRiYTNiNDY5ZjY3ODgyOGY4NzU5ZGYxOGQ1bDJSRklITjJVOGFmMFpyZllrMmM0YXpXbXpKNGJEakFrOTZUTUhaOXZYVjlmNnhkY2pTUFVNVy96NXFLUXh0L3ljaFFWandCUlVTN21kVEhNN0dmZz09&plusEmbedTitle=true"
-  ></iframe>
+  <scene />
 </template>
 
+
 <script>
-  // import HelloWorld from '../components/HelloWorld'
+  import Scene from '../components/Scene.vue'
 
   export default {
     name: 'Home',
 
     components: {
-      // HelloWorld,
+        Scene
     },
   }
 </script>
+
+
+<style lang="scss" scoped>
+#p5-canvas {
+  width: 105vw;
+  height: 105vh;
+  margin-left: -50px;
+  margin-top: -100px;
+  overflow: hidden;
+}
+</style>
