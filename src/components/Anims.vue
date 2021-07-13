@@ -4,16 +4,16 @@
     dense
     nav
     >
-    <v-list-item
-        v-for="item in items"
-        :key="item.key"
-    >
-        <v-list-item-content>
-        <v-list-item-title>{{ item.key }} {{ item.val }}</v-list-item-title>
-        
-        </v-list-item-content>
-    </v-list-item>
-</v-list>
+        <v-list-item
+            v-for="item in items"
+            :key="item.key"
+        >
+            <v-list-item-content>
+            <v-list-item-title>{{ item.key }} {{ item.val }}</v-list-item-title>
+            
+            </v-list-item-content>
+        </v-list-item>
+    </v-list>
 </template>
 
 
