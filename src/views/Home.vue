@@ -19,7 +19,10 @@
               dense
               na
           >
-            <v-list-item-group v-model="shapeItemsModel">
+            <v-list-item-group 
+            v-model="shapeItemsModel"
+            mandatory
+            >
               <v-list-item
                 v-for="item in shapeItems"
                 :key="item.usage"
@@ -98,7 +101,10 @@
               <v-divider></v-divider>
 
               <!-- selectedMobject anims -->
-              <v-list-item-group v-model="selectedMobject.stateModel">
+              <v-list-item-group 
+              v-model="selectedMobject.stateModel"
+              mandatory
+              >
                 <v-list-item
                   v-for="(state, i) in selectedMobject.states"
                   :key="i"
@@ -383,7 +389,6 @@ export default ({
       }
       return false; 
     },
-
 
     keyPressed(sketch) {
       if (sketch.key.toLowerCase() === "c")
