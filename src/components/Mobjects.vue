@@ -8,6 +8,7 @@
         v-for="item in items"
         :key="item.title"
         link
+        @click="setShape(item.title)"
     >
         <v-list-item-icon>
         <v-icon>{{ item.icon }}</v-icon>
@@ -34,6 +35,12 @@ export default ({
           { title: 'Function', icon: 'mdi-help-box' },
           { title: 'LaTeX', icon: 'mdi-help-box' },
       ],
-    })
+    }), 
+
+    methods: {
+        setShape(shapeStr) {
+            console.log("set shape to " + shapeStr.toLowerCase()); 
+        }
+    }
 })
 </script>

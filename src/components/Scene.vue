@@ -1,9 +1,4 @@
 <template>
-  <!-- <iframe
-      id="p5-canvas"
-      src="https://openprocessing.org/sketch/1227678/embed/?plusEmbedHash=MWQ5YzJiNzIwNThhYTkwY2NjZWQxMWQyM2Q1NWRhOWU4YWY0NjRkZThhMGQyYTk4MzIwOTlkYTRmZDZhZWNhNjhhMzlhY2RkOTA4N2IxZjRiYmY4ZWE3MTNkZDI3NDI3MTM2YzU0YWRiYTNiNDY5ZjY3ODgyOGY4NzU5ZGYxOGQ1bDJSRklITjJVOGFmMFpyZllrMmM0YXpXbXpKNGJEakFrOTZUTUhaOXZYVjlmNnhkY2pTUFVNVy96NXFLUXh0L3ljaFFWandCUlVTN21kVEhNN0dmZz09&plusEmbedTitle=true"
-  ></iframe> -->
-
   <vue-p5
     id="p5-ctx"
     @setup="setup"
@@ -27,8 +22,6 @@
     },
 
     data: () => ({
-      color: [0, 200, 0], 
-      currShapeString: null,  
       shapes: [],
       distToToggleMenu: 20, 
       menuW: 100, 
@@ -77,9 +70,9 @@
             this.drawRect(sketch, currShape.x, currShape.y, 50, 50); 
           }
 
-          if (currShape.menuOn) {
-            this.showMenu(sketch, currShape.x, currShape.y, "TODO: fill menu"); 
-          }
+          // if (currShape.menuOn) {
+          //   this.showMenu(sketch, currShape.x, currShape.y, "TODO: fill menu"); 
+          // }
         }
       }, 
 
@@ -113,24 +106,32 @@
         }
         
         // new shape
-        this.shapes.push( { 
-                            typeStr: this.currShapeString, 
-                            x: sketch.int(sketch.mouseX), 
-                            y: sketch.int(sketch.mouseY), 
-                            menuOn: true
-                          } 
-                        );
+        this.addShape(  { 
+                          typeStr: this.currShapeString, 
+                          x: sketch.int(sketch.mouseX), 
+                          y: sketch.int(sketch.mouseY), 
+                          menuOn: true
+                        } 
+                     );
       }, 
+
+      setCurrShapeString(s) {
+          this.currShapeString = s; 
+      },
+
+      addShape(shapeObj) {
+        this.shapes.push(shapeObj); 
+      },
 
       keyPressed(sketch) {
         if (sketch.key.toLowerCase() === "c")
-          this.currShapeString = "circle"; 
+          this.setCurrShapeString("circle"); 
         if (sketch.key.toLowerCase() === "r")
-          this.currShapeString = "rect"; 
+          this.setCurrShapeString("rect"); 
         if (sketch.key.toLowerCase() === "p")
-          this.currShapeString = "point"; 
+          this.setCurrShapeString("point"); 
         if (sketch.key.toLowerCase() === "t")
-          this.currShapeString = "triangle"; 
+          this.setCurrShapeString("triangle"); 
 
         if (sketch.key.toLowerCase() === "d")
           console.log(this.shapes);
@@ -153,15 +154,15 @@
       }, 
     },
 
-    render(h) {
-      return h(VueP5, {on: this});
-    }
+    // render(h) {
+    //   return h(VueP5, {on: this});
+    // }
   })
 </script>
 
 
 <style lang="scss" scoped>
-#p5-ctx {
+#p6-ctx {
   width: 105vw;
   height: 105vh;
   margin-left: -10px;
