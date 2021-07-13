@@ -5,14 +5,13 @@
   ></iframe> -->
 
   <vue-p5
-        @preload="preload"
-        @setup="setup"
-        @draw="draw"
-        @keypressed="keyPressed"
-        @mousepressed="mousePressed"
-        @mousemoved="mouseMoved"
-        @mousedragged="mouseDragged">
-    </vue-p5>
+    id="p5-ctx"
+    @setup="setup"
+    @draw="draw"
+    @keypressed="keyPressed"
+    @mousepressed="mousePressed"
+  >
+  </vue-p5>
 </template>
 
 
@@ -29,10 +28,7 @@
 
     data: () => ({
       color: [0, 200, 0], 
-      currShape: null, 
       currShapeString: null,  
-      w: null, 
-      h: null,  
       shapes: [],
       distToToggleMenu: 20, 
       menuW: 100, 
@@ -41,8 +37,8 @@
 
     methods: {
       setup(sketch) {
-        sketch.createCanvas(400, 400); 
-        sketch.rectMode(CENTER);
+        sketch.createCanvas(sketch.windowWidth, sketch.windowHeight); 
+        sketch.rectMode(sketch.CENTER);
 	
 	      this.currShapeString = "circle"; 
         sketch.noFill(); 
@@ -58,19 +54,31 @@
       },
       
       draw(sketch) {
-        // sketch.background(...this.color);
-        // sketch.text('Hello p5!', 20, 20);
         sketch.background("black"); 
 	
         for (let i = 0; i < this.shapes.length; i++) {		
-          this.setShape(this.shapes[i].str); 
           sketch.noFill(); 
           sketch.strokeWeight(5);
           sketch.stroke("blue"); 
-          this.currShape(shapes[i].loc[0], shapes[i].loc[1], w, h); 
-          if (this.shapes[i].menuOn) {
-            this.showMenu(this.shapes[i].loc[0], this.shapes[i].loc[1],
-                    "Pos: (" + this.shapes[i].loc[0] + ", " + this.shapes[i].loc[1] + ")"); 
+
+          let currShape = this.shapes[i]; 
+
+          // draw shape
+          if (currShape.typeStr === "circle") {
+            this.drawCircle(sketch, currShape.x, currShape.y, 50, 50); 
+          }
+          else if (currShape.typeStr === "point") {
+            this.drawPoint(sketch, currShape.x, currShape.y, 5, 5); 
+          }
+          else if (currShape.typeStr === "triangle") {
+            this.drawTriangle(sketch, currShape.x, currShape.y, 50, 50); 
+          }
+          else if (currShape.typeStr === "rect") {
+            this.drawRect(sketch, currShape.x, currShape.y, 50, 50); 
+          }
+
+          if (currShape.menuOn) {
+            this.showMenu(sketch, currShape.x, currShape.y, "TODO: fill menu"); 
           }
         }
       }, 
@@ -81,51 +89,37 @@
         sketch.rect(x+this.menuW/2, y+this.menuH/2, this.menuW, this.menuH); 
         sketch.fill("black"); 
         sketch.noStroke(); 
-        sketch.text(contents, this.x+8, this.y+15);  
-      }, 
-
-     setShape(typeString) {
-        if (typeString === "point") {
-          currShape = ellipse;
-          this.w = 5; 
-          this.h = 5;
-        }
-        else {
-          this.w = 50; 
-          this.h = 50; 
-
-          if (typeString === "circle") {
-            this.currShape = drawCircle;
-          }
-          if (typeString === "rect") {
-            this.currShape = rect;
-          }
-          if (typeString === "triangle") {
-            this.currShape = drawTriangle;
-          }
-
-        }
+        sketch.text(contents, x+8, y+15);  
       }, 
 
       mousePressed(sketch) {
-        if (!this.pointOnCanvas(sketch.mouseX, sketch.mouseY)) {
+        if (!this.pointOnCanvas(sketch, sketch.mouseX, sketch.mouseY)) {
           return; 
         }
+        else {
+        }
+
         // close enough to existing shape? 
         for (let i = 0; i < this.shapes.length; i++) {	
-          if (dist(sketch.mouseX, sketch.mouseY, this.shapes[i].loc[0], this.shapes[i].loc[1]) < this.distToToggleMenu) {
+          if (sketch.dist(sketch.mouseX, sketch.mouseY, this.shapes[i].x, this.shapes[i].y) < this.distToToggleMenu) {
             this.shapes[i].menuOn = !this.shapes[i].menuOn
             return; 
           }
         }
         
         // turn off all of the old menus
-        for (let i = 0; i < shapes.length; i++) {	
+        for (let i = 0; i < this.shapes.length; i++) {	
           this.shapes[i].menuOn = false;
         }
         
         // new shape
-        this.shapes.push( {str: this.currShapeString, loc: [int(sketch.mouseX), int(sketch.mouseY)], menuOn: true} );
+        this.shapes.push( { 
+                            typeStr: this.currShapeString, 
+                            x: sketch.int(sketch.mouseX), 
+                            y: sketch.int(sketch.mouseY), 
+                            menuOn: true
+                          } 
+                        );
       }, 
 
       keyPressed(sketch) {
@@ -137,6 +131,9 @@
           this.currShapeString = "point"; 
         if (sketch.key.toLowerCase() === "t")
           this.currShapeString = "triangle"; 
+
+        if (sketch.key.toLowerCase() === "d")
+          console.log(this.shapes);
       },
 
       drawCircle(sketch, x, y, w, h) {
@@ -147,6 +144,13 @@
         sketch.triangle(x-w/2, y+h/2, x+w/2, y+h/2, x, y-h/2); 
       }, 
 
+      drawPoint(sketch, x, y, w, h) {
+        sketch.ellipse(x, y, w, h); 
+      }, 
+
+      drawRect(sketch, x, y, w, h) {
+        sketch.rect(x, y, w, h); 
+      }, 
     },
 
     render(h) {
@@ -157,11 +161,11 @@
 
 
 <style lang="scss" scoped>
-#p5-canvas {
+#p5-ctx {
   width: 105vw;
   height: 105vh;
-  margin-left: -50px;
-  margin-top: -100px;
+  margin-left: -10px;
+  margin-top: -12px;
   overflow: hidden;
 }
 </style>
