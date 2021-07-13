@@ -19,7 +19,7 @@
               v-on="on"
             >
               <v-icon dark>
-                mdi-help-box
+                mdi-information
               </v-icon>
             </v-btn>
           </template>

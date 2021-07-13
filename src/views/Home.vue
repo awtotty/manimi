@@ -1,6 +1,7 @@
 <template>
-  <v-container>
+  <v-container class="gray darken-4">
     <v-row>
+      <!-- MOBJECTS -->
       <v-col
         cols="12"
         sm="3"
@@ -20,8 +21,8 @@
           >
             <v-list-item-group v-model="shapeItemsModel">
               <v-list-item
-                v-for="(item, i) in shapeItems"
-                :key="i"
+                v-for="item in shapeItems"
+                :key="item.usage"
                 @click="setCurrShapeString(item.name)"
               >
                 <v-list-item-icon>
@@ -38,6 +39,7 @@
         </v-sheet>
       </v-col>
 
+      <!-- SCENE -->
       <v-col
         ref="hello"
         cols="12"
@@ -57,6 +59,7 @@
               @draw="draw"
               @keypressed="keyPressed"
               @mousepressed="mousePressed"
+              @mousereleased="mouseReleased"
             >
             </vue-p5>
             <!-- end scene -->
@@ -65,6 +68,7 @@
         </v-sheet>
       </v-col>
 
+      <!-- ANIMS -->
       <v-col
         cols="12"
         sm="3"
@@ -158,6 +162,7 @@
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
                     <v-btn
+                      class="white--text"
                       block
                       rounded
                       color="#e07a5f"
@@ -239,9 +244,18 @@ export default ({
         sketch.strokeWeight(5);
         sketch.stroke("blue"); 
 
-        let currShape = this.shapes[i]; 
+        // check for drag
+        if (this.shapes[i].dragging) {
+          this.shapes[i].x = sketch.int(sketch.mouseX + this.shapes[i].offsetX);  
+          this.shapes[i].y = sketch.int(sketch.mouseY + this.shapes[i].offsetY);  
+
+          // update init state 
+          this.shapes[i].anims.splice(0, 1); 
+          this.shapes[i].anims.unshift( "(" + this.shapes[i].x + "," + this.shapes[i].y + ")" );
+        }
 
         // draw shape
+        let currShape = this.shapes[i]; 
         if (currShape.typeStr.toLowerCase() === "circle") {
           this.drawCircle(sketch, currShape.x, currShape.y, 50, 50); 
         }
@@ -279,6 +293,11 @@ export default ({
         if (minDist > this.distToToggleMenu) {
           this.selectedMobject = null; 
         }
+        else {
+          this.selectedMobject.dragging = true; 
+          this.selectedMobject.offsetX = this.selectedMobject.x - sketch.mouseX; 
+          this.selectedMobject.offsetY = this.selectedMobject.y - sketch.mouseY; 
+        }
         return; 
       }
       
@@ -292,10 +311,24 @@ export default ({
                           "(" + sketch.int(sketch.mouseX) + "," + sketch.int(sketch.mouseY) + ")", 
                         ],
                         animModel: -1, 
+                        dragging: false, 
+                        offsetX: 0, 
+                        offsetY: 0, 
                       } 
                   );
+      // update current anim focus
       this.selectedMobject = this.shapes[this.shapes.length-1]; 
+
+      // select mouse
+      this.currShapeString = "mouse"; 
+      this.shapeItemsModel = 0; 
     }, 
+
+    mouseReleased(sketch) {
+      if (this.selectedMobject != null) {
+        this.selectedMobject.dragging = false; 
+      }
+    },
 
     setCurrShapeString(s) {
         this.currShapeString = s; 
@@ -325,7 +358,9 @@ export default ({
     },
 
     deleteAnimFromMobject(shapeObj, animIndex) {
-      if (animIndex > -1) {
+      // can't delete all anim states 
+      let numAnims = shapeObj.anims.length;  
+      if (numAnims > 1 && animIndex > -1 && animIndex < numAnims) {
         shapeObj.anims.splice(animIndex, 1); 
         return true; 
       }
