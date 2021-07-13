@@ -98,13 +98,13 @@
               <v-divider></v-divider>
 
               <!-- selectedMobject anims -->
-              <v-list-item-group v-model="selectedMobject.animModel">
+              <v-list-item-group v-model="selectedMobject.stateModel">
                 <v-list-item
-                  v-for="(anim, i) in this.selectedMobject.anims"
+                  v-for="(state, i) in selectedMobject.states"
                   :key="i"
                 >
                   <v-list-item-content>
-                    <v-list-item-text v-text="anim"></v-list-item-text>
+                    <v-list-item-text v-item="state">Pos: ({{state.x}}, {{state.y}})</v-list-item-text>
                   </v-list-item-content>
                 </v-list-item>
               </v-list-item-group>
@@ -123,7 +123,7 @@
                         color="#525893"
                         v-bind="attrs"
                         v-on="on"
-                        @click="addAnimToMobject(selectedMobject, 'test anim')"
+                        @click="addStateToMobject(selectedMobject, selectedMobject.stateModel)"
                       >
                         <v-icon dark>
                           mdi-plus
@@ -143,7 +143,7 @@
                         color="#e07a5f"
                         v-bind="attrs"
                         v-on="on"
-                        @click="deleteAnimFromMobject(selectedMobject, selectedMobject.animModel)"
+                        @click="deleteStateFromMobject(selectedMobject, selectedMobject.stateModel)"
                       >
                         <v-icon dark>
                           mdi-delete
@@ -244,29 +244,37 @@ export default ({
         sketch.strokeWeight(5);
         sketch.stroke("blue"); 
 
+        let currShape = this.shapes[i]; 
         // check for drag
-        if (this.shapes[i].dragging) {
-          this.shapes[i].x = sketch.int(sketch.mouseX + this.shapes[i].offsetX);  
-          this.shapes[i].y = sketch.int(sketch.mouseY + this.shapes[i].offsetY);  
+        if (currShape.dragging) {
+          if (currShape.stateModel < 0 || currShape.stateModel < 0) {
+            console.error("Selected state index is invalid: " + currShape.stateModel); 
+            continue; 
+          }
 
-          // update init state 
-          this.shapes[i].anims.splice(0, 1); 
-          this.shapes[i].anims.unshift( "(" + this.shapes[i].x + "," + this.shapes[i].y + ")" );
+          // update current state 
+          let newState = currShape.states[currShape.stateModel];  
+          newState.x = sketch.int(sketch.mouseX + currShape.offsetX);
+          newState.y = sketch.int(sketch.mouseY + currShape.offsetY);
+
+          // NOTE: this has to be done with a remove/add to get Vue to rerender the anim component
+          currShape.states.splice(currShape.stateModel, 1, newState); 
         }
+        // this.shapes[i] = currShape; 
 
         // draw shape
-        let currShape = this.shapes[i]; 
+        let currState = currShape.states[currShape.stateModel]; 
         if (currShape.typeStr.toLowerCase() === "circle") {
-          this.drawCircle(sketch, currShape.x, currShape.y, 50, 50); 
+          this.drawCircle(sketch, currState.x, currState.y, 50, 50); 
         }
         else if (currShape.typeStr.toLowerCase() === "point") {
-          this.drawPoint(sketch, currShape.x, currShape.y, 5, 5); 
+          this.drawPoint(sketch, currState.x, currState.y, 5, 5); 
         }
         else if (currShape.typeStr.toLowerCase() === "triangle") {
-          this.drawTriangle(sketch, currShape.x, currShape.y, 50, 50); 
+          this.drawTriangle(sketch, currState.x, currState.y, 50, 50); 
         }
         else if (currShape.typeStr.toLowerCase() === "square") {
-          this.drawRect(sketch, currShape.x, currShape.y, 50, 50); 
+          this.drawRect(sketch, currState.x, currState.y, 50, 50); 
         }
       }
     }, 
@@ -281,7 +289,8 @@ export default ({
         // close enough to existing shape? find closest
         let minDist = Infinity; 
         for (let i = 0; i < this.shapes.length; i++) {	
-          let d = sketch.dist(sketch.mouseX, sketch.mouseY, this.shapes[i].x, this.shapes[i].y); 
+          let shapeState = this.shapes[i].states[this.shapes[i].stateModel]; 
+          let d = sketch.dist(sketch.mouseX, sketch.mouseY, shapeState.x, shapeState.y); 
           console.log(d); 
           if (d < this.distToToggleMenu ) {
             console.log("here"); 
@@ -295,8 +304,8 @@ export default ({
         }
         else {
           this.selectedMobject.dragging = true; 
-          this.selectedMobject.offsetX = this.selectedMobject.x - sketch.mouseX; 
-          this.selectedMobject.offsetY = this.selectedMobject.y - sketch.mouseY; 
+          this.selectedMobject.offsetX = this.selectedMobject.states[this.selectedMobject.stateModel].x - sketch.mouseX; 
+          this.selectedMobject.offsetY = this.selectedMobject.states[this.selectedMobject.stateModel].y - sketch.mouseY; 
         }
         return; 
       }
@@ -307,10 +316,13 @@ export default ({
                         x: sketch.int(sketch.mouseX), 
                         y: sketch.int(sketch.mouseY), 
                         menuOn: true, 
-                        anims: [
-                          "(" + sketch.int(sketch.mouseX) + "," + sketch.int(sketch.mouseY) + ")", 
+                        states: [
+                          { 
+                            x: sketch.int(sketch.mouseX), 
+                            y: sketch.int(sketch.mouseY), 
+                          }, 
                         ],
-                        animModel: -1, 
+                        stateModel: 0, 
                         dragging: false, 
                         offsetX: 0, 
                         offsetY: 0, 
@@ -353,19 +365,25 @@ export default ({
       }
     },
 
-    addAnimToMobject(shapeObj, animStr) {
-      shapeObj.anims.push(animStr);
+    addStateToMobject(shapeObj, indexToCopy) {
+      let newState = Object.assign({}, shapeObj.states[indexToCopy]);
+      shapeObj.states.splice(indexToCopy+1, 0, newState);
+      shapeObj.stateModel = indexToCopy+1; 
     },
 
-    deleteAnimFromMobject(shapeObj, animIndex) {
+    deleteStateFromMobject(shapeObj, index) {
+      let numStates = shapeObj.states.length;  
       // can't delete all anim states 
-      let numAnims = shapeObj.anims.length;  
-      if (numAnims > 1 && animIndex > -1 && animIndex < numAnims) {
-        shapeObj.anims.splice(animIndex, 1); 
+      if (numStates > 1 && index > -1 && index < numStates) {
+        shapeObj.states.splice(index, 1); 
+        if (shapeObj.stateModel >= shapeObj.states.length) {
+          shapeObj.stateModel = shapeObj.states.length-1; 
+        } 
         return true; 
       }
       return false; 
     },
+
 
     keyPressed(sketch) {
       if (sketch.key.toLowerCase() === "c")
