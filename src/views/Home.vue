@@ -8,14 +8,14 @@
         lg="2"
       >
         <v-sheet
-          rounded="lg"
+          rounded
           min-height="50"
           elevation="2"
         >
 
           <!-- start mobjects menu -->
           <v-list
-              rounded="lg"
+              rounded
               dense
               na
           >
@@ -51,7 +51,7 @@
       >
         <v-sheet
           height="85vh"
-          rounded="lg"
+          rounded
         >
           <v-container id="scene-container">
 
@@ -78,7 +78,7 @@
         lg="2"
       >
         <v-sheet
-          rounded="lg"
+          rounded
           min-height="50" 
           elevation="2"
         >
@@ -86,7 +86,7 @@
           <!-- start anims menu -->
           <v-list
           class="text-center"
-          rounded="lg"
+          rounded
           dense
           v-if="this.selectedMobject != null 
                 && this.selectedMobject.typeStr.toLowerCase() != 'mouse'" 
@@ -94,7 +94,7 @@
               <!-- selectedMobject type -->
               <v-list-item>
                   <v-list-item-content>
-                  <v-list-item-text>{{ selectedMobject.typeStr }}</v-list-item-text>
+                  <v-list-item>{{ selectedMobject.typeStr }}</v-list-item>
                   </v-list-item-content>
               </v-list-item>
 
@@ -103,14 +103,20 @@
               <!-- selectedMobject anims -->
               <v-list-item-group 
               v-model="selectedMobject.stateModel"
-              mandatory
+              mandatory 
               >
                 <v-list-item
                   v-for="(state, i) in selectedMobject.states"
                   :key="i"
                 >
                   <v-list-item-content>
-                    <v-list-item-text v-item="state">Pos: ({{state.x}}, {{state.y}})</v-list-item-text>
+
+                    Pos: ({{state.x}}, {{state.y}}) 
+                    Rot: {{state.rot}}
+                    Color: {{state.color}}
+                    Size: {{state.size}}
+                    Start Time: {{state.time}}
+
                   </v-list-item-content>
                 </v-list-item>
               </v-list-item-group>
@@ -214,12 +220,13 @@ export default ({
       // { name: 'LaTeX', icon: 'mdi-format-text' },
     ],
     shapes: [],
-    animItems: [
-      
-    ],
     selectedMobject: null, 
     currShapeString: "Mouse", 
     distToToggleMenu: 20, 
+    colorItems: [
+      { name: "blue" } , 
+      { name: "red" } , 
+    ], 
   }),
 
   methods: {
@@ -232,7 +239,7 @@ export default ({
 
       sketch.noFill(); 
       sketch.strokeWeight(5); 
-      sketch.stroke("blue"); 
+      sketch.frameRate(24); 
     },
 
     pointOnCanvas(sketch, x, y) {
@@ -248,7 +255,6 @@ export default ({
       for (let i = 0; i < this.shapes.length; i++) {		
         sketch.noFill(); 
         sketch.strokeWeight(5);
-        sketch.stroke("blue"); 
 
         let currShape = this.shapes[i]; 
         // check for drag
@@ -266,10 +272,19 @@ export default ({
           // NOTE: this has to be done with a remove/add to get Vue to rerender the anim component
           currShape.states.splice(currShape.stateModel, 1, newState); 
         }
-        // this.shapes[i] = currShape; 
 
         // draw shape
+        if (currShape.stateModel < 0 || currShape.stateModel >= currShape.states.length)
+        {
+          console.log("OH NO! stateModel=" + currShape.stateModel + "/" + Object.keys(currShape.states[0]).length-1); 
+          // TODO: hacky way to get the stateModel to be correct with nested lists 
+          // currShape.stateModel %= Object.keys(currShape.states[0]).length-1;  
+          // console.log("new stateModel=" + currShape.stateModel); 
+          continue;
+        }
         let currState = currShape.states[currShape.stateModel]; 
+        sketch.stroke(currState.color); 
+        // sketch.fill(currState.color); 
         if (currShape.typeStr.toLowerCase() === "circle") {
           this.drawCircle(sketch, currState.x, currState.y, 50, 50); 
         }
@@ -297,9 +312,7 @@ export default ({
         for (let i = 0; i < this.shapes.length; i++) {	
           let shapeState = this.shapes[i].states[this.shapes[i].stateModel]; 
           let d = sketch.dist(sketch.mouseX, sketch.mouseY, shapeState.x, shapeState.y); 
-          console.log(d); 
           if (d < this.distToToggleMenu ) {
-            console.log("here"); 
             this.selectedMobject = this.shapes[i]; 
             minDist = d; 
           }
@@ -319,13 +332,16 @@ export default ({
       // new shape
       this.addShape(  { 
                         typeStr: this.currShapeString, 
-                        x: sketch.int(sketch.mouseX), 
-                        y: sketch.int(sketch.mouseY), 
                         menuOn: true, 
                         states: [
                           { 
                             x: sketch.int(sketch.mouseX), 
                             y: sketch.int(sketch.mouseY), 
+                            rot: 0, 
+                            color: "blue",
+                            size: 1.0,
+                            // TODO: default to 1s later than previous state
+                            time: 0,
                           }, 
                         ],
                         stateModel: 0, 
