@@ -13,7 +13,7 @@
               fab
               dark
               small 
-              color="#525893" 
+              color="#e07a5f"
               to="/about"
               v-bind="attrs"
               v-on="on"
@@ -33,7 +33,7 @@
               fab
               dark
               small 
-              color="#81b29a"
+              color="#525893" 
               to="/"
               v-bind="attrs"
               v-on="on"
@@ -53,7 +53,7 @@
               fab
               dark
               small 
-              color="#e07a5f"
+              color="#81b29a"
               v-bind="attrs"
               v-on="on"
             >
