@@ -259,6 +259,7 @@
 
 <script>
 import VueP5 from "vue-p5";
+import axios from 'axios';
 
 export default ({
   name: "Home",
@@ -289,6 +290,18 @@ export default ({
   }),
 
   methods: {
+    getVid() {
+      const path = 'http://localhost:5000/manim';
+      axios.post(path, this.shapes)
+        .then( (res) => {
+          this.res = res.data; 
+          console.log("Server echo:\n" + res.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+
     setup(sketch) {
       let cW = parseInt(this.$refs.hello.offsetWidth, 10);
       let cH = parseInt(this.$refs.hello.offsetHeight, 10);
@@ -391,7 +404,6 @@ export default ({
       // new shape
       this.addShape(  { 
                         typeStr: this.currShapeString, 
-                        menuOn: true, 
                         states: [
                           { 
                             x: sketch.int(sketch.mouseX), 
