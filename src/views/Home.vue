@@ -100,8 +100,75 @@
 
               <v-divider></v-divider>
 
+              <!-- selected state view -->
+              <v-list
+              class="state-list-stack-long"
+              >
+                <v-list-item>
+                  <v-text-field
+                    v-model="selectedMobject.states[selectedMobject.stateModel].x"
+                    label="x"
+                    class="mt-0 pt-0"
+                    type="number"
+                  ></v-text-field>
+                </v-list-item>
+
+                <v-list-item>
+                  <v-text-field
+                    v-model="selectedMobject.states[selectedMobject.stateModel].y"
+                    label="y"
+                    class="mt-0 pt-0"
+                    type="number"
+                  ></v-text-field>
+                </v-list-item>
+
+                <v-list-item>
+                  <v-text-field
+                    v-model="selectedMobject.states[selectedMobject.stateModel].rot"
+                    label="Rotation (deg)"
+                    class="mt-0 pt-0"
+                    type="number"
+                    step="15"
+                  ></v-text-field>
+                </v-list-item>
+
+                <v-list-item>
+                  <v-text-field
+                    v-model="selectedMobject.states[selectedMobject.stateModel].size"
+                    label="Size"
+                    min="0"
+                    class="mt-0 pt-0"
+                    type="number"
+                    step="0.1"
+                  ></v-text-field>
+                </v-list-item>
+
+                <v-list-item>
+                  <v-text-field
+                    v-model="selectedMobject.states[selectedMobject.stateModel].color"
+                    label="Color"
+                    class="mt-0 pt-0"
+                    type="text"
+                  ></v-text-field>
+                </v-list-item>
+
+                <v-list-item>
+                  <v-text-field
+                    v-model="selectedMobject.states[selectedMobject.stateModel].time"
+                    label="Time"
+                    min="0"
+                    class="mt-0 pt-0"
+                    type="number"
+                  ></v-text-field>
+                </v-list-item>
+
+              </v-list>
+
+              <v-divider></v-divider>
+
               <!-- selectedMobject anims -->
               <v-list-item-group 
+              class="state-list-stack-short"
               v-model="selectedMobject.stateModel"
               mandatory 
               >
@@ -109,15 +176,7 @@
                   v-for="(state, i) in selectedMobject.states"
                   :key="i"
                 >
-                  <v-list-item-content>
-
-                    Pos: ({{state.x}}, {{state.y}}) 
-                    Rot: {{state.rot}}
-                    Color: {{state.color}}
-                    Size: {{state.size}}
-                    Start Time: {{state.time}}
-
-                  </v-list-item-content>
+                State {{i}}
                 </v-list-item>
               </v-list-item-group>
 
@@ -142,7 +201,7 @@
                         </v-icon>
                       </v-btn>
                     </template>
-                    <span>Add Animation</span>
+                    <span>Add State</span>
                   </v-tooltip>
 
                   <v-tooltip bottom>
@@ -162,7 +221,7 @@
                         </v-icon>
                       </v-btn>
                     </template>
-                    <span>Delete Animation</span>
+                    <span>Delete State</span>
                   </v-tooltip>
                 </v-row>
               </v-list-item>
@@ -211,7 +270,7 @@ export default ({
   data: () => ({
     shapeItemsModel: 0, 
     shapeItems: [
-      { name: 'Mouse', icon: 'mdi-cursor-default-outline' },
+      { name: 'Select', icon: 'mdi-cursor-default-outline' },
       { name: 'Circle', icon: 'mdi-circle-outline' },
       { name: 'Point', icon: 'mdi-circle-small' },
       { name: 'Square', icon: 'mdi-square-outline' },
@@ -407,17 +466,6 @@ export default ({
     },
 
     keyPressed(sketch) {
-      if (sketch.key.toLowerCase() === "c")
-        this.setCurrShapeString("Circle"); 
-      if (sketch.key.toLowerCase() === "r")
-        this.setCurrShapeString("Square"); 
-      if (sketch.key.toLowerCase() === "p")
-        this.setCurrShapeString("Point"); 
-      if (sketch.key.toLowerCase() === "t")
-        this.setCurrShapeString("Triangle"); 
-
-      if (sketch.key.toLowerCase() === "d")
-        console.log(this.shapes);
     },
 
     drawCircle(sketch, x, y, w, h) {
@@ -457,5 +505,13 @@ export default ({
   margin-left: -10px;
   margin-top: -12px;
   overflow: hidden;
+}
+.state-list-stack-long {
+  max-height: 40;
+  overflow: auto;
+}
+.state-list-stack-short {
+  max-height: 25vh;
+  overflow: auto;
 }
 </style>
