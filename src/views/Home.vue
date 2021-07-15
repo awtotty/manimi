@@ -291,15 +291,38 @@ export default ({
 
   methods: {
     getVid() {
-      const path = 'http://localhost:5000/manim';
-      axios.post(path, this.shapes)
-        .then( (res) => {
-          this.res = res.data; 
-          console.log("Server echo:\n" + res.data);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      // TODO: make unique
+      let vidId = "/hello"
+      const path = 'http://localhost:5000/manim' + vidId;
+
+      // ask server to create vid
+      axios({
+        url: path,
+        method: 'POST',
+        responseType: 'blob',
+        data: this.shapes, 
+      }).then( (res) => {
+        console.log("Server response to vid creation request: " + res.data); 
+      }).catch( (error) => {
+        console.error(error); 
+      });
+
+      // ask server to deliver vid
+      axios({
+        url: path,
+        method: 'GET',
+        responseType: 'blob',
+      }).then( (res) => {
+        console.log("Got download from server"); 
+        let fileURL = window.URL.createObjectURL(new Blob([res.data], { type: "video/mp4" } ));
+        let fileLink = document.createElement('a');
+        fileLink.href = fileURL;
+        fileLink.setAttribute('download', 'file.pdf');
+        document.body.appendChild(fileLink);
+        fileLink.click();
+      }).catch( (error) => {
+        console.error(error); 
+      });
     },
 
     setup(sketch) {

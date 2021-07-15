@@ -83,7 +83,7 @@
         try {
           this.$refs.appc.getVid(); 
         } catch (error) {
-          console.log("Something went wrong communicating with the app"); 
+          console.log("Something went wrong communicating with the app. You probably aren't in the editor."); 
         }
       },
     }
