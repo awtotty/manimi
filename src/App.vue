@@ -56,6 +56,7 @@
               color="#81b29a"
               v-bind="attrs"
               v-on="on"
+              @click="getVid()" 
             >
               <v-icon dark>
                 mdi-download
@@ -69,14 +70,25 @@
     </v-app-bar>
 
     <v-main> 
-      <router-view></router-view>
+      <router-view ref="appc"></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
   export default {
+    methods: {
+      getVid() {
+        console.log("From App"); 
+        try {
+          this.$refs.appc.getVid(); 
+        } catch (error) {
+          console.log("Something went wrong communicating with the app. You probably aren't in the editor."); 
+        }
+      },
+    }
   }
+
 </script>
 
 <style lang="scss">

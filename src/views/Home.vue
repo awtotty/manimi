@@ -259,6 +259,7 @@
 
 <script>
 import VueP5 from "vue-p5";
+import axios from 'axios';
 
 export default ({
   name: "Home",
@@ -289,6 +290,41 @@ export default ({
   }),
 
   methods: {
+    getVid() {
+      // TODO: make unique
+      let vidId = "/hello"
+      const path = 'http://localhost:5000/manim' + vidId;
+
+      // ask server to create vid
+      axios({
+        url: path,
+        method: 'POST',
+        responseType: 'blob',
+        data: this.shapes, 
+      }).then( (res) => {
+        console.log("Server response to vid creation request: " + res.data); 
+      }).catch( (error) => {
+        console.error(error); 
+      });
+
+      // ask server to deliver vid
+      axios({
+        url: path,
+        method: 'GET',
+        responseType: 'blob',
+      }).then( (res) => {
+        console.log("Got download from server"); 
+        let fileURL = window.URL.createObjectURL(new Blob([res.data], { type: "video/mp4" } ));
+        let fileLink = document.createElement('a');
+        fileLink.href = fileURL;
+        fileLink.setAttribute('download', 'file.pdf');
+        document.body.appendChild(fileLink);
+        fileLink.click();
+      }).catch( (error) => {
+        console.error(error); 
+      });
+    },
+
     setup(sketch) {
       let cW = parseInt(this.$refs.hello.offsetWidth, 10);
       let cH = parseInt(this.$refs.hello.offsetHeight, 10);
@@ -391,7 +427,6 @@ export default ({
       // new shape
       this.addShape(  { 
                         typeStr: this.currShapeString, 
-                        menuOn: true, 
                         states: [
                           { 
                             x: sketch.int(sketch.mouseX), 
