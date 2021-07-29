@@ -392,18 +392,27 @@ export default ({
         let adjY = adjustedCoords.y;
         let size = currState.size * this.canvasScaleFactor; 
         let showGlow = i == this.shapeModel; 
+
+        // adjust tranformation matrix for rotations
+        sketch.translate(adjX, adjY); 
+        sketch.rotate(sketch.radians(currState.rot)); 
+
         if (currShape.typeStr.toLowerCase() === "circle") {
-          this.drawCircle(sketch, adjX, adjY, size, size, currState.color, showGlow); 
+          this.drawCircle(sketch, size, size, currState.color, showGlow); 
         }
         else if (currShape.typeStr.toLowerCase() === "point") {
-          this.drawPoint(sketch, adjX, adjY, size/10, size/10, currState.color, showGlow); 
+          this.drawPoint(sketch, size/10, size/10, currState.color, showGlow); 
         }
         else if (currShape.typeStr.toLowerCase() === "triangle") {
-          this.drawTriangle(sketch, adjX, adjY, size, size, currState.color, showGlow); 
+          this.drawTriangle(sketch, size, size, currState.color, showGlow); 
         }
         else if (currShape.typeStr.toLowerCase() === "square") {
-          this.drawRect(sketch, adjX, adjY, size, size, currState.color, showGlow); 
+          this.drawRect(sketch, size, size, currState.color, showGlow); 
         }
+
+        // reset tranformation matrix
+        sketch.rotate(-sketch.radians(currState.rot)); 
+        sketch.translate(-adjX, -adjY); 
       }
     }, 
 
@@ -526,7 +535,8 @@ export default ({
     keyPressed(sketch) {
     },
 
-    drawCircle(sketch, x, y, w, h, color, showGlow) {
+    drawCircle(sketch, w, h, color, showGlow) {
+      let x = 0; y = 0; 
       if (showGlow) {
         sketch.strokeWeight(10); 
         sketch.stroke(255,255,255,100);
@@ -537,7 +547,8 @@ export default ({
       sketch.ellipse(x, y, w, h); 
     }, 
 
-    drawTriangle(sketch, x, y, w, h, color, showGlow) {
+    drawTriangle(sketch, w, h, color, showGlow) {
+      let x = 0, y = 0; 
       if (showGlow) {
         sketch.strokeWeight(10); 
         sketch.stroke(255,255,255,100);
@@ -548,7 +559,8 @@ export default ({
       sketch.triangle(x-w/2, y+h/2, x+w/2, y+h/2, x, y-h/2); 
     }, 
 
-    drawPoint(sketch, x, y, w, h, color, showGlow) {
+    drawPoint(sketch, w, h, color, showGlow) {
+      let x = 0, y = 0; 
       if (showGlow) {
         sketch.strokeWeight(10); 
         sketch.stroke(255,255,255,100);
@@ -559,7 +571,8 @@ export default ({
       sketch.ellipse(x, y, w, h); 
     }, 
 
-    drawRect(sketch, x, y, w, h, color, showGlow) {
+    drawRect(sketch, w, h, color, showGlow) {
+      let x = 0, y = 0; 
       if (showGlow) {
         sketch.strokeWeight(10); 
         sketch.stroke(255,255,255,100);
