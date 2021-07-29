@@ -292,9 +292,9 @@ export default ({
   methods: {
     getVid() {
       // TODO: make unique
-      let vidId = "/hello"
-      // let server = 'http://localhost:5000/manim'
-      let server = "https://178.128.180.174:5000/manim"
+      let vidId = "/m_" + Date.now()
+      let server = 'http://localhost:5000/manim'
+      // let server = "https://178.128.180.174:5000/manim"
       let path = server + vidId;
 
       // ask server to create vid
