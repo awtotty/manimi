@@ -295,7 +295,7 @@ export default ({
     getVid() {
       let vidId = "/m_" + Date.now()
       // let server = 'http://localhost:5000/manim'
-      let server = "https://178.128.180.174:5000/manim"
+      let server = "https://www.maniminteractiveserver.com:5000/manim"
       let path = server + vidId;
 
       // ask server to create vid
@@ -320,7 +320,7 @@ export default ({
         let fileURL = window.URL.createObjectURL(new Blob([res.data], { type: "video/mp4" } ));
         let fileLink = document.createElement('a');
         fileLink.href = fileURL;
-        fileLink.setAttribute('download', 'file.pdf');
+        fileLink.setAttribute('download', 'my_scene.mp4');
         document.body.appendChild(fileLink);
         fileLink.click();
       }).catch( (error) => {
@@ -536,7 +536,7 @@ export default ({
     },
 
     drawCircle(sketch, w, h, color, showGlow) {
-      let x = 0; y = 0; 
+      let x = 0, y = 0; 
       if (showGlow) {
         sketch.strokeWeight(10); 
         sketch.stroke(255,255,255,100);
