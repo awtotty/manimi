@@ -485,6 +485,7 @@ export default ({
 
     addStateToMobject(shapeObj, indexToCopy) {
       let newState = Object.assign({}, shapeObj.states[indexToCopy]);
+      newState["time"] += 1; 
       shapeObj.states.splice(indexToCopy+1, 0, newState);
       shapeObj.stateModel = indexToCopy+1; 
     },
