@@ -44,7 +44,7 @@
 
       <!-- SCENE -->
       <v-col
-        ref="hello"
+        ref="scene"
         cols="12"
         sm="6"
         lg="8"
@@ -281,18 +281,19 @@ export default ({
     ],
     shapes: [],
     selectedMobject: null, 
+    shapeModel: null, 
     currShapeString: "Mouse", 
     distToToggleMenu: 20, 
     colorItems: [
       { name: "blue" } , 
       { name: "red" } , 
-    ], 
+    ],
+    canvasScaleFactor: 50,  
   }),
 
   methods: {
     getVid() {
-      // TODO: make unique
-      let vidId = "/hello"
+      let vidId = "/m_" + Date.now()
       // let server = 'http://localhost:5000/manim'
       let server = "https://178.128.180.174:5000/manim"
       let path = server + vidId;
@@ -323,16 +324,18 @@ export default ({
         document.body.appendChild(fileLink);
         fileLink.click();
       }).catch( (error) => {
+        alert("We were unable to create your video. Please check your scene and try again.");
         console.error(error); 
       });
     },
 
     setup(sketch) {
-      let cW = parseInt(this.$refs.hello.offsetWidth, 10);
-      let cH = parseInt(this.$refs.hello.offsetHeight, 10);
+      let cW = parseInt(this.$refs.scene.offsetWidth, 10);
+      let cH = parseInt(this.$refs.scene.offsetHeight, 10);
       console.log(cW + "," + cH); 
       sketch.createCanvas(cW, cH);  
       sketch.rectMode(sketch.CENTER);
+      this.canvasScaleFactor = parseInt(cW / 14, 10); 
 
       sketch.noFill(); 
       sketch.strokeWeight(5); 
@@ -351,7 +354,6 @@ export default ({
 
       for (let i = 0; i < this.shapes.length; i++) {		
         sketch.noFill(); 
-        sketch.strokeWeight(5);
 
         let currShape = this.shapes[i]; 
         // check for drag
@@ -363,8 +365,9 @@ export default ({
 
           // update current state 
           let newState = currShape.states[currShape.stateModel];  
-          newState.x = sketch.int(sketch.mouseX + currShape.offsetX);
-          newState.y = sketch.int(sketch.mouseY + currShape.offsetY);
+          let adjustedCoords = this.convertCanvasCoordsToReal(sketch, sketch.mouseX+currShape.offsetX, sketch.mouseY+currShape.offsetY);
+          newState.x = sketch.int(adjustedCoords.x);
+          newState.y = sketch.int(adjustedCoords.y);
 
           // NOTE: this has to be done with a remove/add to get Vue to rerender the anim component
           currShape.states.splice(currShape.stateModel, 1, newState); 
@@ -379,21 +382,37 @@ export default ({
           // console.log("new stateModel=" + currShape.stateModel); 
           continue;
         }
+
         let currState = currShape.states[currShape.stateModel]; 
-        sketch.stroke(currState.color); 
+        // sketch.stroke(currState.color); 
         // sketch.fill(currState.color); 
+
+        let adjustedCoords = this.convertRealCoordsToCanvas(sketch, currState.x, currState.y);
+        let adjX = adjustedCoords.x;
+        let adjY = adjustedCoords.y;
+        let size = currState.size * this.canvasScaleFactor; 
+        let showGlow = i == this.shapeModel; 
+
+        // adjust tranformation matrix for rotations
+        sketch.translate(adjX, adjY); 
+        sketch.rotate(sketch.radians(currState.rot)); 
+
         if (currShape.typeStr.toLowerCase() === "circle") {
-          this.drawCircle(sketch, currState.x, currState.y, 50, 50); 
+          this.drawCircle(sketch, size, size, currState.color, showGlow); 
         }
         else if (currShape.typeStr.toLowerCase() === "point") {
-          this.drawPoint(sketch, currState.x, currState.y, 5, 5); 
+          this.drawPoint(sketch, size/10, size/10, currState.color, showGlow); 
         }
         else if (currShape.typeStr.toLowerCase() === "triangle") {
-          this.drawTriangle(sketch, currState.x, currState.y, 50, 50); 
+          this.drawTriangle(sketch, size, size, currState.color, showGlow); 
         }
         else if (currShape.typeStr.toLowerCase() === "square") {
-          this.drawRect(sketch, currState.x, currState.y, 50, 50); 
+          this.drawRect(sketch, size, size, currState.color, showGlow); 
         }
+
+        // reset tranformation matrix
+        sketch.rotate(-sketch.radians(currState.rot)); 
+        sketch.translate(-adjX, -adjY); 
       }
     }, 
 
@@ -402,26 +421,36 @@ export default ({
         return; 
       }
 
+      let adjustedCoords = this.convertCanvasCoordsToReal(sketch, sketch.mouseX, sketch.mouseY); 
+      let adjMouseX = adjustedCoords.x; 
+      let adjMouseY = adjustedCoords.y; 
+
       // using mouse tool? 
       if (this.currShapeString.toLowerCase() === "mouse") {
         // close enough to existing shape? find closest
         let minDist = Infinity; 
         for (let i = 0; i < this.shapes.length; i++) {	
           let shapeState = this.shapes[i].states[this.shapes[i].stateModel]; 
-          let d = sketch.dist(sketch.mouseX, sketch.mouseY, shapeState.x, shapeState.y); 
+          let adjustedShapeCoords = this.convertRealCoordsToCanvas(sketch, shapeState.x, shapeState.y);
+          let d = sketch.dist(sketch.mouseX, sketch.mouseY, adjustedShapeCoords.x, adjustedShapeCoords.y); 
           if (d < this.distToToggleMenu ) {
             this.selectedMobject = this.shapes[i]; 
+            this.shapeModel = i; 
             minDist = d; 
           }
         }
         // not close enough, turn off menu
         if (minDist > this.distToToggleMenu) {
           this.selectedMobject = null; 
+          this.shapeModel = null; 
         }
         else {
           this.selectedMobject.dragging = true; 
-          this.selectedMobject.offsetX = this.selectedMobject.states[this.selectedMobject.stateModel].x - sketch.mouseX; 
-          this.selectedMobject.offsetY = this.selectedMobject.states[this.selectedMobject.stateModel].y - sketch.mouseY; 
+          let adjustedShapeCoords = this.convertRealCoordsToCanvas(sketch, 
+                                                                    this.selectedMobject.states[this.selectedMobject.stateModel].x,
+                                                                    this.selectedMobject.states[this.selectedMobject.stateModel].y);
+          this.selectedMobject.offsetX = adjustedShapeCoords.x - sketch.mouseX; 
+          this.selectedMobject.offsetY = adjustedShapeCoords.y - sketch.mouseY; 
         }
         return; 
       }
@@ -431,12 +460,11 @@ export default ({
                         typeStr: this.currShapeString, 
                         states: [
                           { 
-                            x: sketch.int(sketch.mouseX), 
-                            y: sketch.int(sketch.mouseY), 
+                            x: sketch.int(adjMouseX), 
+                            y: sketch.int(adjMouseY), 
                             rot: 0, 
                             color: "blue",
                             size: 1.0,
-                            // TODO: default to 1s later than previous state
                             time: 0,
                           }, 
                         ],
@@ -448,6 +476,7 @@ export default ({
                   );
       // update current anim focus
       this.selectedMobject = this.shapes[this.shapes.length-1]; 
+      this.shapeModel = this.shapes.length-1; 
 
       // select mouse
       this.currShapeString = "mouse"; 
@@ -485,6 +514,7 @@ export default ({
 
     addStateToMobject(shapeObj, indexToCopy) {
       let newState = Object.assign({}, shapeObj.states[indexToCopy]);
+      newState["time"] += 1; 
       shapeObj.states.splice(indexToCopy+1, 0, newState);
       shapeObj.stateModel = indexToCopy+1; 
     },
@@ -505,21 +535,61 @@ export default ({
     keyPressed(sketch) {
     },
 
-    drawCircle(sketch, x, y, w, h) {
+    drawCircle(sketch, w, h, color, showGlow) {
+      let x = 0; y = 0; 
+      if (showGlow) {
+        sketch.strokeWeight(10); 
+        sketch.stroke(255,255,255,100);
+        sketch.ellipse(x, y, w, h); 
+      }
+      sketch.stroke(color);
+      sketch.strokeWeight(5);
       sketch.ellipse(x, y, w, h); 
     }, 
 
-    drawTriangle(sketch, x, y, w, h) {
+    drawTriangle(sketch, w, h, color, showGlow) {
+      let x = 0, y = 0; 
+      if (showGlow) {
+        sketch.strokeWeight(10); 
+        sketch.stroke(255,255,255,100);
+        sketch.triangle(x-w/2, y+h/2, x+w/2, y+h/2, x, y-h/2); 
+      }
+      sketch.stroke(color);
+      sketch.strokeWeight(5);
       sketch.triangle(x-w/2, y+h/2, x+w/2, y+h/2, x, y-h/2); 
     }, 
 
-    drawPoint(sketch, x, y, w, h) {
+    drawPoint(sketch, w, h, color, showGlow) {
+      let x = 0, y = 0; 
+      if (showGlow) {
+        sketch.strokeWeight(10); 
+        sketch.stroke(255,255,255,100);
+        sketch.ellipse(x, y, w, h); 
+      }
+      sketch.stroke(color);
+      sketch.strokeWeight(5);
       sketch.ellipse(x, y, w, h); 
     }, 
 
-    drawRect(sketch, x, y, w, h) {
+    drawRect(sketch, w, h, color, showGlow) {
+      let x = 0, y = 0; 
+      if (showGlow) {
+        sketch.strokeWeight(10); 
+        sketch.stroke(255,255,255,100);
+        sketch.rect(x, y, w, h); 
+      }
+      sketch.stroke(color);
+      sketch.strokeWeight(5);
       sketch.rect(x, y, w, h); 
     }, 
+
+    convertCanvasCoordsToReal(sketch, x, y) {
+      return {x: (x-sketch.width/2+20)/this.canvasScaleFactor, y: (-(y-sketch.height/2+20))/this.canvasScaleFactor};
+    },
+
+    convertRealCoordsToCanvas(sketch, x, y) {
+      return {x: (x*this.canvasScaleFactor+sketch.width/2-20), y: (-y*this.canvasScaleFactor+sketch.height/2-20)};
+    }
   },
 
   // render(h) {
