@@ -536,7 +536,7 @@ export default ({
     },
 
     drawCircle(sketch, w, h, color, showGlow) {
-      let x = 0; y = 0; 
+      let x = 0, y = 0; 
       if (showGlow) {
         sketch.strokeWeight(10); 
         sketch.stroke(255,255,255,100);
