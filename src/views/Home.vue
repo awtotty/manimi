@@ -324,6 +324,7 @@ export default ({
         document.body.appendChild(fileLink);
         fileLink.click();
       }).catch( (error) => {
+        alert("We were unable to create your video. Please check your scene and try again.");
         console.error(error); 
       });
     },
@@ -353,7 +354,6 @@ export default ({
 
       for (let i = 0; i < this.shapes.length; i++) {		
         sketch.noFill(); 
-        sketch.strokeWeight(5);
 
         let currShape = this.shapes[i]; 
         // check for drag
@@ -384,27 +384,25 @@ export default ({
         }
 
         let currState = currShape.states[currShape.stateModel]; 
-        sketch.stroke(currState.color); 
+        // sketch.stroke(currState.color); 
         // sketch.fill(currState.color); 
 
         let adjustedCoords = this.convertRealCoordsToCanvas(sketch, currState.x, currState.y);
         let adjX = adjustedCoords.x;
         let adjY = adjustedCoords.y;
+        let size = currState.size * this.canvasScaleFactor; 
+        let showGlow = i == this.shapeModel; 
         if (currShape.typeStr.toLowerCase() === "circle") {
-          let size = currState.size * this.canvasScaleFactor; 
-          this.drawCircle(sketch, adjX, adjY, size, size); 
+          this.drawCircle(sketch, adjX, adjY, size, size, currState.color, showGlow); 
         }
         else if (currShape.typeStr.toLowerCase() === "point") {
-          let size = currState.size * this.canvasScaleFactor / 10; 
-          this.drawPoint(sketch, adjX, adjY, size, size); 
+          this.drawPoint(sketch, adjX, adjY, size/10, size/10, currState.color, showGlow); 
         }
         else if (currShape.typeStr.toLowerCase() === "triangle") {
-          let size = currState.size * this.canvasScaleFactor; 
-          this.drawTriangle(sketch, adjX, adjY, size, size); 
+          this.drawTriangle(sketch, adjX, adjY, size, size, currState.color, showGlow); 
         }
         else if (currShape.typeStr.toLowerCase() === "square") {
-          let size = currState.size * this.canvasScaleFactor; 
-          this.drawRect(sketch, adjX, adjY, size, size); 
+          this.drawRect(sketch, adjX, adjY, size, size, currState.color, showGlow); 
         }
       }
     }, 
@@ -428,12 +426,14 @@ export default ({
           let d = sketch.dist(sketch.mouseX, sketch.mouseY, adjustedShapeCoords.x, adjustedShapeCoords.y); 
           if (d < this.distToToggleMenu ) {
             this.selectedMobject = this.shapes[i]; 
+            this.shapeModel = i; 
             minDist = d; 
           }
         }
         // not close enough, turn off menu
         if (minDist > this.distToToggleMenu) {
           this.selectedMobject = null; 
+          this.shapeModel = null; 
         }
         else {
           this.selectedMobject.dragging = true; 
@@ -467,6 +467,7 @@ export default ({
                   );
       // update current anim focus
       this.selectedMobject = this.shapes[this.shapes.length-1]; 
+      this.shapeModel = this.shapes.length-1; 
 
       // select mouse
       this.currShapeString = "mouse"; 
@@ -525,19 +526,47 @@ export default ({
     keyPressed(sketch) {
     },
 
-    drawCircle(sketch, x, y, w, h) {
+    drawCircle(sketch, x, y, w, h, color, showGlow) {
+      if (showGlow) {
+        sketch.strokeWeight(10); 
+        sketch.stroke(255,255,255,100);
+        sketch.ellipse(x, y, w, h); 
+      }
+      sketch.stroke(color);
+      sketch.strokeWeight(5);
       sketch.ellipse(x, y, w, h); 
     }, 
 
-    drawTriangle(sketch, x, y, w, h) {
+    drawTriangle(sketch, x, y, w, h, color, showGlow) {
+      if (showGlow) {
+        sketch.strokeWeight(10); 
+        sketch.stroke(255,255,255,100);
+        sketch.triangle(x-w/2, y+h/2, x+w/2, y+h/2, x, y-h/2); 
+      }
+      sketch.stroke(color);
+      sketch.strokeWeight(5);
       sketch.triangle(x-w/2, y+h/2, x+w/2, y+h/2, x, y-h/2); 
     }, 
 
-    drawPoint(sketch, x, y, w, h) {
+    drawPoint(sketch, x, y, w, h, color, showGlow) {
+      if (showGlow) {
+        sketch.strokeWeight(10); 
+        sketch.stroke(255,255,255,100);
+        sketch.ellipse(x, y, w, h); 
+      }
+      sketch.stroke(color);
+      sketch.strokeWeight(5);
       sketch.ellipse(x, y, w, h); 
     }, 
 
-    drawRect(sketch, x, y, w, h) {
+    drawRect(sketch, x, y, w, h, color, showGlow) {
+      if (showGlow) {
+        sketch.strokeWeight(10); 
+        sketch.stroke(255,255,255,100);
+        sketch.rect(x, y, w, h); 
+      }
+      sketch.stroke(color);
+      sketch.strokeWeight(5);
       sketch.rect(x, y, w, h); 
     }, 
 
