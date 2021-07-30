@@ -63,6 +63,7 @@
               @keypressed="keyPressed"
               @mousepressed="mousePressed"
               @mousereleased="mouseReleased"
+              @windowresized="windowResized"
             >
             </vue-p5>
             <!-- end scene -->
@@ -289,6 +290,7 @@ export default ({
       { name: "red" } , 
     ],
     canvasScaleFactor: 50,  
+    canvasOffset: 10, 
   }),
 
   methods: {
@@ -326,7 +328,10 @@ export default ({
       }).catch( (error) => {
         alert("We were unable to create your video. Please check your scene and try again.");
         console.error(error); 
+      }).finally( () => {
+        this.$emit("download-complete"); 
       });
+
     },
 
     setup(sketch) {
@@ -343,10 +348,17 @@ export default ({
     },
 
     pointOnCanvas(sketch, x, y) {
-      return x < sketch.width
+      return x < sketch.width 
           && x > 0 
           && y < sketch.height
           && y > 0 
+    },
+
+    windowResized(sketch) {
+      let cW = parseInt(this.$refs.scene.offsetWidth, 10);
+      let cH = parseInt(this.$refs.scene.offsetHeight, 10);
+      sketch.resizeCanvas(cW, cH); 
+      this.canvasScaleFactor = parseInt(cW / 14, 10); 
     },
     
     draw(sketch) {
@@ -564,10 +576,12 @@ export default ({
       if (showGlow) {
         sketch.strokeWeight(10); 
         sketch.stroke(255,255,255,100);
+        sketch.fill(color); 
         sketch.ellipse(x, y, w, h); 
       }
       sketch.stroke(color);
       sketch.strokeWeight(5);
+      sketch.noFill(); 
       sketch.ellipse(x, y, w, h); 
     }, 
 
