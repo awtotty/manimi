@@ -326,7 +326,10 @@ export default ({
       }).catch( (error) => {
         alert("We were unable to create your video. Please check your scene and try again.");
         console.error(error); 
+      }).finally( () => {
+        this.$emit("download-complete"); 
       });
+
     },
 
     setup(sketch) {

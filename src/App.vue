@@ -56,6 +56,7 @@
               color="#81b29a"
               v-bind="attrs"
               v-on="on"
+              :loading="downloadInProgress"
               @click="getVid()" 
             >
               <v-icon dark>
@@ -70,23 +71,44 @@
     </v-app-bar>
 
     <v-main> 
-      <router-view ref="appc"></router-view>
+      <router-view 
+        ref="appc"
+        @download-complete="setDownloadInProgress(false)"
+      ></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
   export default {
+    data: () => ({
+      loader: null, 
+      downloadInProgress: false,
+    }), 
+    
     methods: {
       getVid() {
-        console.log("From App"); 
+        if (this.downloadInProgress) {
+          console.log("Download already in progress"); 
+          return; 
+        }
+
+        this.setDownloadInProgress(true);
+
+        console.log("Requesting video from server"); 
         try {
-          this.$refs.appc.getVid(); 
+          this.$refs.appc.getVid();
         } catch (error) {
+          console.log(error); 
           console.log("Something went wrong communicating with the app. You probably aren't in the editor."); 
+          this.setDownloadInProgress(false);
         }
       },
-    }
+      setDownloadInProgress(bool) {
+        this.downloadInProgress = bool;
+      }
+    }, 
+
   }
 
 </script>
@@ -97,9 +119,6 @@ $manim-blue: #525893;
 $manim-green: #87c2a5; 
 $manim-red: #e07a5f; 
 
-// * {
-//   color: $manim-blue; 
-// }
 
 #top-bar {
   color: $manim-tan; 
