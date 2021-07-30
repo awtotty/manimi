@@ -564,10 +564,12 @@ export default ({
       if (showGlow) {
         sketch.strokeWeight(10); 
         sketch.stroke(255,255,255,100);
+        fill(color); 
         sketch.ellipse(x, y, w, h); 
       }
       sketch.stroke(color);
       sketch.strokeWeight(5);
+      noFill(); 
       sketch.ellipse(x, y, w, h); 
     }, 
 
