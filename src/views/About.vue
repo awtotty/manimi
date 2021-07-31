@@ -21,9 +21,9 @@
     >
       <iframe
         id="about-imbed"
-        src="https://www.manim.community/"
+        src="README.html"
       >
-      </iframe>
+      </iframe> 
     </v-sheet>
   </v-col>
 
@@ -40,11 +40,11 @@
 </template>
 
 
-
 <style lang="scss" scoped>
 #about-imbed {
   width: 100%;
   height: 50vw;
+  border: 0px; 
   overflow: auto;
 }
 </style>
