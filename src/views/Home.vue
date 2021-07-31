@@ -304,10 +304,9 @@ export default ({
       axios({
         url: path,
         method: 'POST',
-        responseType: 'blob',
         data: this.shapes, 
       }).then( (res) => {
-        console.log("Server response to vid creation request: " + res.data); 
+        console.log("Sent server video creation request"); 
       }).catch( (error) => {
         console.error(error); 
       });
@@ -326,7 +325,7 @@ export default ({
         document.body.appendChild(fileLink);
         fileLink.click();
       }).catch( (error) => {
-        alert("We were unable to create your video. Please check your scene and try again.");
+        alert("We were unable to create your video. There may be an error in your scene or a problem with our servers. Please try again.");
         console.error(error); 
       }).finally( () => {
         this.$emit("download-complete"); 
