@@ -62,3 +62,6 @@ To run a minified build for production, run
 ```
 npm run build
 ```
+
+## Attribution
+The Manim Community logo is courtesy of [Manim Commmunity](https://github.com/ManimCommunity/manim-website) under [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/). 
